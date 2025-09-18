@@ -1,0 +1,52 @@
+# === railway.toml ===
+# Created: September 18, 2025 - 12:00 PM
+# Purpose: Railway deployment configuration and environment settings
+# Configuration:
+#   - Build and deployment settings for PDF generation service
+#   - Environment variables for production operation
+# Notes:
+#   - Optimized for Python web service deployment
+#   - Includes health check and scaling configuration
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+[environments.production.variables]
+FLASK_ENV = "production"
+COMPRESSION_ENABLED = "true"
+COMPRESSION_LEVEL = "3"
+MAX_FILE_AGE_HOURS = "24"
+UPLOAD_FOLDER = "generated_pdfs"
+
+[environments.staging.variables]
+FLASK_ENV = "development"
+FLASK_DEBUG = "true"
+COMPRESSION_ENABLED = "true"
+COMPRESSION_LEVEL = "2"
+MAX_FILE_AGE_HOURS = "6"
+UPLOAD_FOLDER = "generated_pdfs"
+
+"""
+ * === railway.toml ===
+ * Updated: September 18, 2025 - 12:00 PM
+ * Summary: Railway deployment configuration with environment-specific settings
+ * Key Components:
+ *   - Nixpacks builder: Automatic Python environment detection
+ *   - Health check: /health endpoint monitoring
+ *   - Restart policy: Automatic recovery from failures
+ *   - Environment variables: Production and staging configurations
+ * Dependencies:
+ *   - Requires: Railway platform deployment
+ * Version History:
+ *   v1.0 - Initial Railway configuration
+ * Notes:
+ *   - Separate staging and production environments
+ *   - Automatic scaling and health monitoring
+ *   - Optimized file cleanup intervals
+ */
