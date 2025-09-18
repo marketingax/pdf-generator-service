@@ -75,7 +75,9 @@ def validate_webhook_payload(data):
     {
         "title": "Your Flyer Title",
         "canva_link": "https://canva.com/design/...",
-        "etsy_design_link": "https://www.etsy.com/listing/..."
+        "etsy_design_link": "https://www.etsy.com/listing/...", // optional
+        "logo_url": "https://example.com/logo.jpg", // optional
+        "flyer_image_url": "https://example.com/flyer.jpg" // optional
     }
     """
     required_fields = ['title', 'canva_link']
@@ -91,6 +93,12 @@ def validate_webhook_payload(data):
     canva_link = data['canva_link']
     if not (canva_link.startswith('http://') or canva_link.startswith('https://')):
         raise BadRequest("canva_link must be a valid URL")
+    
+    # Validate optional image URLs
+    for field in ['etsy_design_link', 'logo_url', 'flyer_image_url']:
+        if field in data and data[field]:
+            if not (data[field].startswith('http://') or data[field].startswith('https://')):
+                raise BadRequest(f"{field} must be a valid URL")
     
     # Use default Etsy link if not provided
     if 'etsy_design_link' not in data or not data['etsy_design_link']:
@@ -157,7 +165,9 @@ def webhook():
             output_path=str(filepath),
             title=data['title'],
             canva_link=data['canva_link'],
-            etsy_design_link=data['etsy_design_link']
+            etsy_design_link=data['etsy_design_link'],
+            logo_url=data.get('logo_url'),
+            flyer_image_url=data.get('flyer_image_url')
         )
         
         # Compress the PDF if enabled

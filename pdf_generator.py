@@ -10,9 +10,12 @@
 #   - Only includes text content and Etsy design link button
 
 import logging
+import requests
+import tempfile
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.colors import Color
+from reportlab.lib.utils import ImageReader
 from pathlib import Path
 
 # Configure logging
@@ -21,15 +24,87 @@ logger = logging.getLogger(__name__)
 # Default Etsy design link if none provided
 DEFAULT_ETSY_DESIGN_LINK = "https://www.etsy.com/listing/1827167654/custom-flyer-design-party-flyer-canva"
 
-def create_pdf(output_path, title, canva_link, etsy_design_link=None):
+def download_image(url, timeout=10):
     """
-    Create a simplified PDF template with text content and download links
+    Download image from URL and return as ImageReader object
+    
+    Parameters:
+    url (str): Image URL to download
+    timeout (int): Request timeout in seconds
+    
+    Returns:
+    ImageReader: ReportLab ImageReader object or None if failed
+    """
+    try:
+        if not url or not url.startswith(('http://', 'https://')):
+            return None
+            
+        logger.info(f"Downloading image from: {url}")
+        response = requests.get(url, timeout=timeout, stream=True)
+        response.raise_for_status()
+        
+        # Create temporary file for the image
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
+            for chunk in response.iter_content(chunk_size=8192):
+                temp_file.write(chunk)
+            temp_file_path = temp_file.name
+        
+        # Create ImageReader from the downloaded file
+        image_reader = ImageReader(temp_file_path)
+        
+        # Clean up temp file after ImageReader is created
+        Path(temp_file_path).unlink()
+        
+        return image_reader
+        
+    except Exception as e:
+        logger.warning(f"Failed to download image from {url}: {e}")
+        return None
+
+def draw_image(canvas, image_reader, x, y, width):
+    """
+    Draw an image on the PDF canvas
+    
+    Parameters:
+    canvas: ReportLab canvas object
+    image_reader: ImageReader object
+    x (float): X position (center)
+    y (float): Y position (top)
+    width (float): Desired width
+    
+    Returns:
+    float: Height of the drawn image
+    """
+    try:
+        if not image_reader:
+            return 0
+            
+        # Get image dimensions
+        img_width, img_height = image_reader.getSize()
+        aspect_ratio = img_height / img_width
+        height = width * aspect_ratio
+        
+        # Draw image centered at x, y
+        canvas.drawImage(image_reader, x - (width / 2), y - height, width, height)
+        
+        logger.debug(f"Drew image: {width}x{height} at ({x}, {y})")
+        return height
+        
+    except Exception as e:
+        logger.warning(f"Failed to draw image: {e}")
+        return 0
+
+def create_pdf(output_path, title, canva_link, etsy_design_link=None, logo_url=None, flyer_image_url=None):
+    """
+    Create a PDF template with images and download links
     
     Parameters:
     output_path (str): Path where the PDF will be saved
     title (str): Title text for the PDF
     canva_link (str): Canva template download link
     etsy_design_link (str, optional): Etsy design service link
+    logo_url (str, optional): URL to logo image
+    flyer_image_url (str, optional): URL to flyer preview image
     
     Returns:
     bool: True if PDF was created successfully, False otherwise
@@ -56,19 +131,28 @@ def create_pdf(output_path, title, canva_link, etsy_design_link=None):
         width, height = letter
         
         # Starting position (top of page with margin)
-        current_y = height - 50
+        current_y = height - 30
         
-        # Define colors
-        button_color = Color(0.2, 0.5, 0.8)  # Blue
-        text_color = Color(0, 0, 0)  # Black
-        white_color = Color(1, 1, 1)  # White
+        # Download images if URLs provided
+        logo_image = download_image(logo_url) if logo_url else None
+        flyer_image = download_image(flyer_image_url) if flyer_image_url else None
+        
+        # Draw logo at the top if provided
+        if logo_image:
+            logo_height = draw_image(c, logo_image, width / 2, current_y, 100)
+            current_y -= (logo_height + 20)
         
         # Title with [Template] suffix
         c.setFillColor(text_color)
         c.setFont("Helvetica-Bold", 18)
         title_text = f"{title} [Template]"
         c.drawCentredString(width / 2, current_y, title_text)
-        current_y -= 60
+        current_y -= 30
+        
+        # Draw flyer image if provided
+        if flyer_image:
+            flyer_height = draw_image(c, flyer_image, width / 2, current_y, 350)
+            current_y -= (flyer_height + 30)
         
         # Welcome message
         c.setFont("Helvetica", 14)
