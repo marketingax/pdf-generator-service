@@ -37,26 +37,47 @@ def download_image(url, timeout=10):
     """
     try:
         if not url or not url.startswith(('http://', 'https://')):
+            logger.warning(f"Invalid image URL: {url}")
             return None
             
         logger.info(f"Downloading image from: {url}")
-        response = requests.get(url, timeout=timeout, stream=True)
+        
+        # Add headers to avoid blocking
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        
+        response = requests.get(url, timeout=timeout, stream=True, headers=headers)
         response.raise_for_status()
+        
+        # Check content type
+        content_type = response.headers.get('content-type', '').lower()
+        if not any(img_type in content_type for img_type in ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']):
+            logger.warning(f"URL does not appear to be an image: {content_type}")
+            return None
         
         # Create temporary file for the image
         with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
             for chunk in response.iter_content(chunk_size=8192):
-                temp_file.write(chunk)
+                if chunk:  # filter out keep-alive chunks
+                    temp_file.write(chunk)
             temp_file_path = temp_file.name
+        
+        # Verify the file was written and has content
+        if Path(temp_file_path).stat().st_size == 0:
+            logger.warning(f"Downloaded image file is empty: {url}")
+            Path(temp_file_path).unlink()
+            return None
         
         # Create ImageReader from the downloaded file
         image_reader = ImageReader(temp_file_path)
         
-        # Clean up temp file after ImageReader is created
-        Path(temp_file_path).unlink()
-        
+        logger.info(f"Successfully downloaded image: {url}")
         return image_reader
         
+    except requests.exceptions.RequestException as e:
+        logger.warning(f"Network error downloading image from {url}: {e}")
+        return None
     except Exception as e:
         logger.warning(f"Failed to download image from {url}: {e}")
         return None
