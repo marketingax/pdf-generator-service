@@ -160,8 +160,28 @@ def create_pdf(output_path, title, canva_link, etsy_design_link=None, logo_url=N
         white_color = Color(1, 1, 1)  # White
         
         # Download images if URLs provided
-        logo_image = download_image(logo_url) if logo_url else None
-        flyer_image = download_image(flyer_image_url) if flyer_image_url else None
+        logo_image = None
+        flyer_image = None
+        
+        try:
+            if logo_url and logo_url.strip():
+                logo_image = download_image(logo_url)
+                if logo_image:
+                    logger.info("Logo image downloaded successfully")
+                else:
+                    logger.warning("Failed to download logo image")
+        except Exception as e:
+            logger.warning(f"Error downloading logo image: {e}")
+        
+        try:
+            if flyer_image_url and flyer_image_url.strip():
+                flyer_image = download_image(flyer_image_url)
+                if flyer_image:
+                    logger.info("Flyer image downloaded successfully")
+                else:
+                    logger.warning("Failed to download flyer image")
+        except Exception as e:
+            logger.warning(f"Error downloading flyer image: {e}")
         
         # Draw logo at the top if provided
         if logo_image:
@@ -273,6 +293,9 @@ def create_pdf(output_path, title, canva_link, etsy_design_link=None, logo_url=N
         
     except Exception as e:
         logger.error(f"Error creating PDF {output_path}: {e}")
+        logger.error(f"Error type: {type(e).__name__}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
         raise Exception(f"Failed to create PDF: {str(e)}")
 
 def validate_pdf_inputs(title, canva_link):
