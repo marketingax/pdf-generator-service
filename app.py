@@ -311,22 +311,3 @@ if __name__ == '__main__':
         debug=os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
     )
 
-"""
- * === app.py ===
- * Updated: September 18, 2025 - 12:00 PM
- * Summary: Main Flask application providing webhook-based PDF generation with compression
- * Key Components:
- *   - webhook(): Main endpoint for PDF generation requests
- *   - download_file(): Serves generated PDF files
- *   - health_check(): Railway monitoring endpoint
- *   - file_status(): Check file availability and expiration
- * Dependencies:
- *   - Requires: Flask, pdf_generator, pdf_compressor, file_manager modules
- * Version History:
- *   v1.0 - Initial release with webhook support
- * Notes:
- *   - Includes automatic file cleanup after 24 hours
- *   - Optional API key authentication for security
- *   - Comprehensive error handling and logging
- *   - Railway deployment ready
- */

@@ -1,14 +1,4 @@
-# === requirements.txt ===
-# Created: September 18, 2025 - 12:00 PM
-# Purpose: Python dependencies for Railway deployment of PDF generation service
-# Key Dependencies:
-#   - Flask: Web framework for webhook endpoints
-#   - reportlab: PDF generation library
-#   - PyMuPDF: PDF compression and manipulation
-#   - Pillow: Image processing for compression
-# Notes:
-#   - Versions pinned for deployment stability
-#   - No Ghostscript dependency required
+# Python dependencies for PDF generation service
 
 # Web Framework
 Flask==3.0.0
@@ -24,27 +14,8 @@ Pillow==10.1.0
 # Utilities
 python-dotenv==1.0.0
 
-# Production Server (optional, Railway can use gunicorn)
+# Production Server
 gunicorn==21.2.0
 
-# Development and Debugging (optional)
+# Development and Debugging
 Werkzeug==3.0.1
-
-"""
- * === requirements.txt ===
- * Updated: September 18, 2025 - 12:00 PM
- * Summary: Production-ready Python dependencies for PDF generation service
- * Key Components:
- *   - Flask 3.0.0: Modern web framework with latest features
- *   - reportlab 4.0.7: Stable PDF generation library
- *   - PyMuPDF 1.23.8: Latest PDF manipulation without external dependencies
- *   - Pillow 10.1.0: Image processing for compression
- * Dependencies:
- *   - Requires: Python 3.8+ for compatibility
- * Version History:
- *   v1.0 - Initial dependency specification
- * Notes:
- *   - All versions tested for Railway deployment
- *   - No system-level dependencies required
- *   - Includes gunicorn for production serving
- */
