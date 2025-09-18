@@ -186,8 +186,10 @@ def webhook():
         # Get file information
         file_size = filepath.stat().st_size
         
-        # Generate download URL
+        # Generate download URL (ensure HTTPS)
         download_url = url_for('download_file', filename=filename, _external=True)
+        if download_url.startswith('http://'):
+            download_url = download_url.replace('http://', 'https://', 1)
         
         logger.info(f"PDF generated successfully: {filename} ({file_size} bytes)")
         
@@ -266,13 +268,18 @@ def file_status(file_id):
         created_time = datetime.fromtimestamp(stat.st_ctime)
         expires_time = created_time + timedelta(hours=Config.MAX_FILE_AGE_HOURS)
         
+        # Generate download URL (ensure HTTPS)
+        download_url = url_for('download_file', filename=filename, _external=True)
+        if download_url.startswith('http://'):
+            download_url = download_url.replace('http://', 'https://', 1)
+        
         return jsonify({
             'file_id': file_id,
             'filename': filename,
             'file_size': stat.st_size,
             'created_at': created_time.isoformat(),
             'expires_at': expires_time.isoformat(),
-            'download_url': url_for('download_file', filename=filename, _external=True),
+            'download_url': download_url,
             'status': 'available' if datetime.utcnow() < expires_time else 'expired'
         })
         

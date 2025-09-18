@@ -229,36 +229,6 @@ def create_pdf(output_path, title, canva_link, etsy_design_link=None, logo_url=N
         
         current_y -= 80
         
-        # Etsy design service button
-        etsy_button_width = 250
-        etsy_button_height = 30
-        etsy_button_x = (width - etsy_button_width) / 2
-        
-        # Draw Etsy button background
-        c.setFillColor(button_color)
-        c.rect(etsy_button_x, current_y - etsy_button_height, etsy_button_width, etsy_button_height, fill=1)
-        
-        # Draw Etsy button text
-        c.setFillColor(white_color)
-        c.setFont("Helvetica-Bold", 11)
-        c.drawCentredString(width / 2, current_y - etsy_button_height/2 - 3, "Need a Custom Design?")
-        
-        # Add clickable link for Etsy
-        c.linkURL(etsy_design_link, (etsy_button_x, current_y - etsy_button_height, etsy_button_x + etsy_button_width, current_y), relative=0)
-        
-        current_y -= 60
-        
-        # Additional information
-        c.setFillColor(text_color)
-        c.setFont("Helvetica", 10)
-        info_text = "Need help customizing this template or want a completely custom design?"
-        c.drawCentredString(width / 2, current_y, info_text)
-        current_y -= 20
-        
-        info_text2 = "Click the button above to get professional design assistance!"
-        c.drawCentredString(width / 2, current_y, info_text2)
-        current_y -= 60
-        
         # Template information section
         c.setFont("Helvetica-Bold", 11)
         c.drawCentredString(width / 2, current_y, "Template Information:")
