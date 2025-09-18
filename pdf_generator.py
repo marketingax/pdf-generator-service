@@ -154,6 +154,11 @@ def create_pdf(output_path, title, canva_link, etsy_design_link=None, logo_url=N
         # Starting position (top of page with margin)
         current_y = height - 30
         
+        # Define colors
+        button_color = Color(0.2, 0.5, 0.8)  # Blue
+        text_color = Color(0, 0, 0)  # Black
+        white_color = Color(1, 1, 1)  # White
+        
         # Download images if URLs provided
         logo_image = download_image(logo_url) if logo_url else None
         flyer_image = download_image(flyer_image_url) if flyer_image_url else None
